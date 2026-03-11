@@ -1,0 +1,135 @@
+# 知识文档生成器配置
+
+# LLM 配置 - 支持多种模型
+llm:
+  # 当前使用的 provider: openai | anthropic | azure | local
+  # Moonshot (Kimi) 使用 openai provider + base_url 方式
+  provider: openai
+
+  # API 配置
+  # Moonshot (Kimi): 填入 MOONSHOT_API_KEY
+  # Anthropic (Claude): 填入 ANTHROPIC_API_KEY
+  # OpenAI: 填入 OPENAI_API_KEY
+  api_key: ${MOONSHOT_API_KEY}
+  base_url: https://api.moonshot.cn/v1
+  # 模型选择
+  # Moonshot 可选: kimi-k2.5, moonshot-v1-8k, moonshot-v1-32k, moonshot-v1-128k
+  model: kimi-k2.5
+
+  # 生成参数
+  temperature: 1  # Kimi 模型只支持 temperature=1
+  max_tokens: 4096
+  timeout: 120  # 请求超时时间（秒）
+
+  # 代理设置
+  skip_proxy: true  # 设置为 true 禁用代理（如果直连更快）
+
+  # 备选配置（可快速切换）
+  profiles:
+    # Kimi 快速版（8K上下文，更便宜）
+    kimi-fast:
+      provider: openai
+      api_key: ${MOONSHOT_API_KEY}
+      base_url: https://api.moonshot.cn/v1
+      model: moonshot-v1-8k
+    # Kimi 长文本版（128K上下文）
+    kimi-long:
+      provider: openai
+      api_key: ${MOONSHOT_API_KEY}
+      base_url: https://api.moonshot.cn/v1
+      model: moonshot-v1-128k
+    # Claude 高质量版
+    claude:
+      provider: anthropic
+      api_key: ${ANTHROPIC_API_KEY}
+      model: claude-3-5-sonnet-20241022
+    # OpenAI
+    openai:
+      provider: openai
+      api_key: ${OPENAI_API_KEY}
+      model: gpt-4o
+    # 本地模型
+    local:
+      provider: openai
+      base_url: http://localhost:11434/v1
+      model: llama2
+
+# 检索配置
+retriever:
+  # 搜索引擎（需要 API Key）
+  search_engine:
+    enabled: false  # 禁用搜索引擎
+    provider: serper  # serper | google | bing
+    api_key: ${SERPER_API_KEY}
+    max_results: 10
+
+  # 学术论文
+  arxiv:
+    enabled: true
+    max_results: 10
+    sort_by: submittedDate  # submittedDate | lastUpdatedDate | relevance
+
+  # GitHub
+  github:
+    enabled: true
+    api_key: ${GITHUB_API_KEY}  # 可选，提高速率限制
+    min_stars: 100
+    max_results: 10
+
+  # 官方文档爬虫
+  crawler:
+    enabled: true
+    timeout: 10
+    max_pages: 5  # 每个域名最多爬取页数
+
+# 筛选配置
+filter:
+  # 来源权威性评分阈值 (0-1)
+  min_authority_score: 0.6
+
+  # 去重相似度阈值
+  dedup_threshold: 0.85
+
+  # 内容最小长度（字符）
+  min_content_length: 500
+
+  # 发布时间过滤（天）
+  max_age_days: 365
+
+# 生成配置
+generator:
+  # 文档类型模板
+  doc_types:
+    tutorial:
+      name: 入门教程
+      description: 循序渐进的学习指南
+    reference:
+      name: 参考文档
+      description: 详细的技术参考
+    comparison:
+      name: 对比评测
+      description: 多方案对比分析
+
+  # 大纲确认
+  confirm_outline: true
+
+  # 每节内容确认
+  confirm_sections: false
+
+# 输出配置
+output:
+  default_format: markdown  # markdown | pdf | docx
+  output_dir: ./output
+
+  # Markdown 配置
+  markdown:
+    template: default
+
+  # PDF 配置
+  pdf:
+    css_file: null
+    page_size: A4
+
+  # Word 配置
+  docx:
+    template: null
