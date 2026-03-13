@@ -32,6 +32,15 @@ console = Console()
 class InteractiveWorkflow:
     """交互式工作流"""
 
+    @staticmethod
+    def _make_serializable(obj):
+        """使对象可 JSON 序列化"""
+        if isinstance(obj, SourceType):
+            return obj.value
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return obj
+
     def __init__(self, config: dict):
         self.config = config
         self.retrievers = self._init_retrievers()
@@ -220,6 +229,7 @@ class InteractiveWorkflow:
 
         except Exception as e:
             await self._handle_error(e)
+            return
 
     async def _run_from_start(self):
         """从头开始运行"""
@@ -338,17 +348,9 @@ class InteractiveWorkflow:
                         console.print(f"[red]✗ {name}: {str(e)[:50]}[/red]")
 
             # 保存检索结果 (将 SourceType 枚举和 datetime 转换为字符串)
-            def make_serializable(obj):
-                """使对象可 JSON 序列化"""
-                if isinstance(obj, SourceType):
-                    return obj.value
-                if isinstance(obj, datetime):
-                    return obj.isoformat()
-                return obj
-
             serializable_sources = []
             for s in all_sources:
-                d = {k: make_serializable(v) for k, v in s.__dict__.items()}
+                d = {k: self._make_serializable(v) for k, v in s.__dict__.items()}
                 serializable_sources.append(d)
             self.state.sources = serializable_sources
             self.state.step = WorkflowStep.SOURCES_RETRIEVED.value
@@ -395,7 +397,7 @@ class InteractiveWorkflow:
             # 保存筛选结果 (将 SourceType 枚举和 datetime 转换为字符串)
             serializable_filtered = []
             for s in filtered:
-                d = {k: make_serializable(v) for k, v in s.__dict__.items()}
+                d = {k: self._make_serializable(v) for k, v in s.__dict__.items()}
                 serializable_filtered.append(d)
             self.state.filtered_sources = serializable_filtered
             self.state.step = WorkflowStep.SOURCES_FILTERED.value
@@ -525,7 +527,7 @@ class InteractiveWorkflow:
                 f"title: {outline.title}",
                 f"type: {outline.doc_type}",
                 f"audience: {outline.target_audience}",
-                f"generated_at: {asyncio.get_event_loop().time()}",
+                f"generated_at: {datetime.now().isoformat()}",
                 f"---",
                 "",
                 f"# {outline.title}",

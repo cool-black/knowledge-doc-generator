@@ -2,6 +2,7 @@
 arXiv 论文检索器
 """
 
+import asyncio
 from datetime import datetime
 from typing import List, Optional
 
@@ -37,8 +38,14 @@ class ArxivRetriever(BaseRetriever):
             sort_by=getattr(arxiv.SortCriterion, self.sort_by, arxiv.SortCriterion.SubmittedDate),
         )
 
+        def _fetch_results():
+            return list(self.client.results(search))
+
+        loop = asyncio.get_event_loop()
+        papers = await loop.run_in_executor(None, _fetch_results)
+
         results = []
-        for paper in self.client.results(search):
+        for paper in papers:
             # 获取 PDF 内容（可选）
             content = f"""
 Title: {paper.title}

@@ -6,8 +6,6 @@ import hashlib
 from dataclasses import dataclass
 from typing import List
 
-import numpy as np
-
 from ..retriever.base import RetrievedContent
 
 
@@ -86,6 +84,8 @@ class ContentFilter:
         TODO: 使用 embedding 计算语义相似度
         """
         query_words = set(query.lower().split())
+        if not query_words:
+            return contents  # Return unsorted if query is empty
 
         def relevance_score(content: RetrievedContent) -> float:
             title_words = set(content.title.lower().split())

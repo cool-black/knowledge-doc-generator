@@ -72,12 +72,12 @@ class GitHubRetriever(BaseRetriever):
 
                 data = await response.json()
 
-        results = []
-        for repo in data.get("items", []):
-            # 获取 README 内容
-            readme_content = await self._fetch_readme(session, repo["full_name"])
+            results = []
+            for repo in data.get("items", []):
+                # 获取 README 内容
+                readme_content = await self._fetch_readme(session, repo["full_name"])
 
-            content = f"""
+                content = f"""
 Repository: {repo['full_name']}
 Description: {repo['description'] or 'No description'}
 Stars: {repo['stargazers_count']}
@@ -88,28 +88,28 @@ README:
 {readme_content[:3000]}...
 """
 
-            result = RetrievedContent(
-                title=repo["full_name"],
-                url=repo["html_url"],
-                source_type=SourceType.GITHUB_REPO,
-                content=content,
-                author=repo["owner"]["login"],
-                publish_date=datetime.fromisoformat(
-                    repo["created_at"].replace("Z", "+00:00")
-                ),
-                authority_score=min(0.5 + repo["stargazers_count"] / 10000, 0.95),
-                metadata={
-                    "stars": repo["stargazers_count"],
-                    "forks": repo["forks_count"],
-                    "language": repo["language"],
-                    "topics": repo.get("topics", []),
-                    "updated_at": repo["updated_at"],
-                    "source": "github",
-                },
-            )
-            results.append(result)
+                result = RetrievedContent(
+                    title=repo["full_name"],
+                    url=repo["html_url"],
+                    source_type=SourceType.GITHUB_REPO,
+                    content=content,
+                    author=repo["owner"]["login"],
+                    publish_date=datetime.fromisoformat(
+                        repo["created_at"].replace("Z", "+00:00")
+                    ),
+                    authority_score=min(0.5 + repo["stargazers_count"] / 10000, 0.95),
+                    metadata={
+                        "stars": repo["stargazers_count"],
+                        "forks": repo["forks_count"],
+                        "language": repo["language"],
+                        "topics": repo.get("topics", []),
+                        "updated_at": repo["updated_at"],
+                        "source": "github",
+                    },
+                )
+                results.append(result)
 
-        return results
+            return results
 
     async def _fetch_readme(
         self, session: aiohttp.ClientSession, repo_full_name: str

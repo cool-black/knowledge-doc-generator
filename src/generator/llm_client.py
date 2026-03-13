@@ -175,11 +175,17 @@ class OpenAIClient(BaseLLMClient):
             proxy_config = https_proxy or http_proxy
             http_client = httpx.AsyncClient(proxy=proxy_config, timeout=timeout)
 
+        self._http_client = http_client
         self.client = openai.AsyncOpenAI(
             api_key=config.get("api_key"),
             base_url=config.get("base_url"),
             http_client=http_client,
         )
+
+    async def close(self):
+        """关闭 HTTP 客户端以释放资源"""
+        if self._http_client:
+            await self._http_client.aclose()
 
     async def generate(
         self,
@@ -193,7 +199,7 @@ class OpenAIClient(BaseLLMClient):
             response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
-                temperature=temperature or self.config.get("temperature", 1),
+                temperature=temperature or self.config.get("temperature", 0.3),
                 max_tokens=max_tokens or self.config.get("max_tokens", 4096),
             )
             return response

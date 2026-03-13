@@ -35,7 +35,9 @@ class MarkdownExporter(BaseExporter):
     def export(self, content: str, output_path: str) -> str:
         """保存 Markdown 文件"""
         # 确保目录存在
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        dir_path = os.path.dirname(output_path)
+        if dir_path:
+            os.makedirs(dir_path, exist_ok=True)
 
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(content)
@@ -134,7 +136,9 @@ class PDFExporter(BaseExporter):
         </html>
         """
 
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        dir_path = os.path.dirname(output_path)
+        if dir_path:
+            os.makedirs(dir_path, exist_ok=True)
 
         HTML(string=full_html).write_pdf(output_path)
 
@@ -179,7 +183,6 @@ class DocxExporter(BaseExporter):
                 run.font.name = 'Consolas'
                 run.font.size = Pt(9)
                 p.paragraph_format.left_indent = Inches(0.3)
-                p.paragraph_format.shading.background_pattern = 1
             # 普通段落
             elif line.strip():
                 # 处理粗体和斜体
@@ -190,7 +193,9 @@ class DocxExporter(BaseExporter):
 
             i += 1
 
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        dir_path = os.path.dirname(output_path)
+        if dir_path:
+            os.makedirs(dir_path, exist_ok=True)
         doc.save(output_path)
 
         return output_path
