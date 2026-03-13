@@ -41,7 +41,7 @@ class ArxivRetriever(BaseRetriever):
         def _fetch_results():
             return list(self.client.results(search))
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         papers = await loop.run_in_executor(None, _fetch_results)
 
         results = []

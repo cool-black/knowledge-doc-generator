@@ -199,7 +199,7 @@ class OpenAIClient(BaseLLMClient):
             response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
-                temperature=temperature or self.config.get("temperature", 0.3),
+                temperature=temperature if temperature is not None else self.config.get("temperature", 0.3),
                 max_tokens=max_tokens or self.config.get("max_tokens", 4096),
             )
             return response
